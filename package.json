@@ -1,0 +1,69 @@
+{
+  "name": "run-gen",
+  "description": "Run generators to completion",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "start": "ava --watch --verbose",
+    "nyc": "xo && nyc --reporter=lcov ava",
+    "report": "node -e \"require('open')('./coverage/lcov-report/index.html')\"",
+    "coverage": "npm run nyc && npm run report ",
+    "test": "xo && ava --verbose",
+    "prepublish": "xo && ava --verbose",
+    "github": "node -e \"require('open')(require('./package.json').homepage)\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nhz-io/run-gen.git"
+  },
+  "pre-push": "test",
+  "keywords": [
+    "generators",
+    "run-gen",
+    "nhz.io"
+  ],
+  "author": "Ishi Ruy <dev@nhz.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nhz-io/run-gen/issues"
+  },
+  "homepage": "https://github.com/nhz-io/run-gen",
+  "devDependencies": {
+    "ava": "^0.16.0",
+    "nyc": "^8.3.0",
+    "open": "0.0.5",
+    "pre-push": "^0.1.1",
+    "xo": "^0.17.0"
+  },
+  "xo": {
+    "esnext": true,
+    "space": 4,
+    "semicolon": false,
+    "ignores": [
+      "coverage/**"
+    ],
+    "rules": {
+      "babel/generator-star-spacing": 0,
+      "comma-dangle": [
+        1,
+        "always-multiline"
+      ],
+      "generator-star-spacing": [
+        1,
+        "after"
+      ],
+      "yield-star-spacing": [
+        1,
+        "after"
+      ],
+      "no-unused-vars": [
+        1
+      ],
+      "require-yield": 1,
+      "ava/prefer-async-await": 1
+    }
+  },
+  "directories": {
+    "test": "test"
+  }
+}
