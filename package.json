@@ -60,7 +60,7 @@
         1
       ],
       "require-yield": 1,
-      "ava/prefer-async-await": 1
+      "ava/prefer-async-await": 0
     }
   },
   "directories": {

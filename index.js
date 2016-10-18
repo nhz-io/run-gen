@@ -43,7 +43,7 @@ function* stepper(task, ...args) {
     }
 
     while (true) { // eslint-disable-line no-constant-condition
-        const result = task.next(args)
+        const result = task.next(args.length < 2 ? args[0] : args)
 
         if (result.value && isFn(result.value.then)) {
             if (result.done) {

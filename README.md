@@ -20,7 +20,7 @@
 <h3 align="center">Run generators to completion</h3>
 
 * Use generators (almost) as you would normally use functions.
-* use `var [res] = yield Promise.resolve('result')` to abstract the async
+* use `result = yield Promise.resolve('result')` to abstract the async
 * `return` result from generator as completion value
 
 ## Install
@@ -51,14 +51,14 @@ const downloadsUrl = `https://api.npmjs.org/downloads/point`
 const registryUrl = `https://registry.npmjs.org`
 
 function* downloads(pkg, period) {
-    const [res] = yield fetch(`${downloadsUrl}/${period}/${pkg}`)
-    const stats = JSON.parse((yield res.text())[0])
+    const res = yield fetch(`${downloadsUrl}/${period}/${pkg}`)
+    const stats = JSON.parse(yield res.text())
     return (stats && stats.downloads) || 'unknown'
 }
 
 function* info(pkg) {
-    const [res] = yield fetch(`${registryUrl}/${pkg}`)
-    const info = JSON.parse((yield res.text())[0])
+    const res = yield fetch(`${registryUrl}/${pkg}`)
+    const info = JSON.parse(yield res.text())
     return {
         name: info.name,
         descriptions: info.description,
