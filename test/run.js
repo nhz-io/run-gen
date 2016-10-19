@@ -81,8 +81,59 @@ test('support for custom runner', t => {
         t.pass()
         return 'pass'
     }
-
     const custom = run.use(runner)
 
     return custom(pass()).then(r => t.is(r, 'pass'))
+})
+
+test('returned promise handled correctly', t => {
+    t.plan(1)
+
+    function* gen() { // eslint-disable-line require-yield
+        return Promise.resolve('pass')
+    }
+
+    return run(gen).then(r => t.is(r, 'pass'))
+})
+
+test('yield and then return promise', t => {
+    t.plan(1)
+
+    function* gen() { // eslint-disable-line require-yield
+        yield 'nothing'
+        return Promise.resolve('pass')
+    }
+
+    return run(gen).then(r => t.is(r, 'pass'))
+})
+
+test('first yielded value is an argument for next() when args are empty', t => {
+    t.plan(1)
+
+    function* gen() {
+        return yield 'pass'
+    }
+
+    return run(gen).then(r => t.is(r, 'pass'))
+})
+
+test('all args are passed to the iterator non-initial next() call', t => {
+    t.plan(1)
+
+    function* gen() {
+        return yield
+    }
+
+    return run(gen(), 1, 2, 3).then(r => t.deepEqual(r, [1, 2, 3]))
+})
+
+test('args are passed to the generator when run with generator', t => {
+    t.plan(2)
+
+    function* gen(...args) {
+        t.falsy(yield)
+        return args
+    }
+
+    return run(gen, 1, 2, 3).then(r => t.deepEqual(r, [1, 2, 3]))
 })
