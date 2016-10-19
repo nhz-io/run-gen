@@ -1,17 +1,13 @@
 'use strict'
 
-const UID = Symbol.for('UID')
-
-function rnd(s = 10) {
-    return Math.random().toString(36).slice(2, s + 2)
-}
+const INIT = Symbol.for('INIT')
 
 function isFn(test) {
     return typeof test === 'function'
 }
 
 function* init(task) { // eslint-disable-line require-yield
-    task[UID] = rnd()
+    task[INIT] = true
 
     return task.next()
 }
@@ -26,7 +22,7 @@ function* promisedNext(promise, task, ...args) {
 }
 
 function* stepper(task, ...args) {
-    if (!task[UID]) {
+    if (!task[INIT]) {
         const result = yield* init(task)
 
         if (result.value && isFn(result.value.then)) {
