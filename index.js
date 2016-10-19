@@ -17,8 +17,8 @@ function* promisedDone(promise) { // eslint-disable-line require-yield
 }
 
 // eslint-disable-next-line require-yield
-function* promisedNext(promise, iterator, ...args) {
-    return promise.then(arg => run(iterator, arg, ...args))
+function* promisedNext(promise, iterator) {
+    return promise.then(arg => run(iterator, arg))
 }
 
 function* stepper(iterator, ...args) {
