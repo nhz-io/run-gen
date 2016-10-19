@@ -6,6 +6,10 @@ function isFn(test) {
     return typeof test === 'function'
 }
 
+function* pass(value) { // eslint-disable-line require-yield
+    return value
+}
+
 function* init(iterator) { // eslint-disable-line require-yield
     iterator[INIT] = true
 
@@ -14,24 +18,24 @@ function* init(iterator) { // eslint-disable-line require-yield
 
 function use(runner) {
     function* promisedDone(promise) { // eslint-disable-line require-yield
-        return promise.then(res => run.run([res][Symbol.iterator]()))
+        return promise.then(res => this.run(pass(res)))
     }
 
     // eslint-disable-next-line require-yield
     function* promisedNext(promise, iterator) {
-        return promise.then(arg => run.run(iterator, arg))
+        return promise.then(arg => this.run(iterator, arg))
     }
 
     function* stepper(iterator, ...args) {
         if (!iterator[INIT]) {
-            const result = yield* run.init(iterator)
+            const result = yield* this.init(iterator)
 
             if (result.value && isFn(result.value.then)) {
                 if (result.done) {
-                    return yield* run.promisedDone(result.value)
+                    return yield* this.promisedDone(result.value)
                 }
 
-                return yield* run.promisedNext(result.value, iterator)
+                return yield* this.promisedNext(result.value, iterator)
             }
 
             if (result.done) {
@@ -48,10 +52,10 @@ function use(runner) {
 
             if (result.value && isFn(result.value.then)) {
                 if (result.done) {
-                    return yield* run.promisedDone(result.value)
+                    return yield* this.promisedDone(result.value)
                 }
 
-                return yield* run.promisedNext(result.value, iterator)
+                return yield* this.promisedNext(result.value, iterator)
             }
 
             if (result.done) {
@@ -77,15 +81,10 @@ function use(runner) {
         })
     }
 
-    run.init = init
-    run.stepper = stepper
-    run.runner = runner
-    run.promisedDone = promisedDone
-    run.promisedNext = promisedNext
-    run.run = run
-    run.use = use
-
-    return run
+    return Object.assign(run, {
+        pass, init, promisedDone, promisedNext,
+        stepper, runner, run, use,
+    })
 }
 
 function* runner(iterator, ...args) {
