@@ -25,7 +25,8 @@ function* promisedNext(promise, iterator) {
 
 function* stepper(iterator, ...args) {
     if (isFn(iterator)) {
-        iterator = iterator()
+        iterator = iterator(...args)
+        args = []
     }
 
     if (!iterator[INIT]) {
