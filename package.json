@@ -1,7 +1,7 @@
 {
   "name": "run-gen",
   "description": "Run generators to completion",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "index.js",
   "scripts": {
     "start": "ava --watch --verbose",
