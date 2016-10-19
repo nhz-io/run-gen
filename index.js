@@ -6,10 +6,10 @@ function isFn(test) {
     return typeof test === 'function'
 }
 
-function* init(task) { // eslint-disable-line require-yield
-    task[INIT] = true
+function* init(iterator) { // eslint-disable-line require-yield
+    iterator[INIT] = true
 
-    return task.next()
+    return iterator.next()
 }
 
 function* promisedDone(promise) { // eslint-disable-line require-yield
@@ -17,20 +17,20 @@ function* promisedDone(promise) { // eslint-disable-line require-yield
 }
 
 // eslint-disable-next-line require-yield
-function* promisedNext(promise, task, ...args) {
-    return promise.then(arg => run(task, arg, ...args))
+function* promisedNext(promise, iterator, ...args) {
+    return promise.then(arg => run(iterator, arg, ...args))
 }
 
-function* stepper(task, ...args) {
-    if (!task[INIT]) {
-        const result = yield* init(task)
+function* stepper(iterator, ...args) {
+    if (!iterator[INIT]) {
+        const result = yield* init(iterator)
 
         if (result.value && isFn(result.value.then)) {
             if (result.done) {
                 return yield* promisedDone(result.value)
             }
 
-            return yield* promisedNext(result.value, task)
+            return yield* promisedNext(result.value, iterator)
         }
 
         if (result.done) {
@@ -43,14 +43,14 @@ function* stepper(task, ...args) {
     }
 
     while (true) { // eslint-disable-line no-constant-condition
-        const result = task.next(args.length < 2 ? args[0] : args)
+        const result = iterator.next(args.length < 2 ? args[0] : args)
 
         if (result.value && isFn(result.value.then)) {
             if (result.done) {
                 return yield* promisedDone(result.value)
             }
 
-            return yield* promisedNext(result.value, task)
+            return yield* promisedNext(result.value, iterator)
         }
 
         if (result.done) {
@@ -62,13 +62,13 @@ function* stepper(task, ...args) {
     }
 }
 
-function* runner(task, ...args) {
-    return yield* stepper(task, ...args)
+function* runner(iterator, ...args) {
+    return yield* stepper(iterator, ...args)
 }
 
-function run(task, ...args) {
+function run(iterator, ...args) {
     return Promise.resolve().then(() => {
-        const iterator = runner(task, ...args)
+        iterator = runner(iterator, ...args)
 
         while (true) { // eslint-disable-line no-constant-condition
             const result = iterator.next()
