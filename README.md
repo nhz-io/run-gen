@@ -61,7 +61,7 @@ function* info(pkg) {
     const info = JSON.parse(yield res.text())
     return {
         name: info.name,
-        descriptions: info.description,
+        description: info.description,
     }
 }
 
