@@ -58,3 +58,13 @@ test('loop back immediates', t => {
 
     return run(loop()).then(r => t.is(r, 3))
 })
+
+test('accept generators as iterators', t => {
+    t.plan(1)
+
+    function* gen() {
+        return 'pass'
+    }
+
+    return run(gen).then(r => t.is(r, 'pass'))
+})

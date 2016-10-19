@@ -1,6 +1,8 @@
 'use strict'
 
 const INIT = Symbol.for('INIT')
+const GFN = (function* () {}).constructor
+console.log('GFN IS:', GFN)
 
 function isFn(test) {
     return typeof test === 'function'
@@ -22,6 +24,10 @@ function* promisedNext(promise, iterator) {
 }
 
 function* stepper(iterator, ...args) {
+    if (isFn(iterator)) {
+        iterator = iterator()
+    }
+
     if (!iterator[INIT]) {
         const result = yield* init(iterator)
 
