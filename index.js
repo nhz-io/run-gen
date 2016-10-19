@@ -40,6 +40,10 @@ function* stepper(task, ...args) {
         if (result.done) {
             return result.value
         }
+
+        if (args.length < 1) {
+            args = [result.value]
+        }
     }
 
     while (true) { // eslint-disable-line no-constant-condition
@@ -57,6 +61,7 @@ function* stepper(task, ...args) {
             return result.value
         }
 
+        args = [result.value]
         yield result.value
     }
 }

@@ -45,3 +45,16 @@ test('async', t => {
 
     return run(g3()).then(r => t.deepEqual(r, ['pass g1', 'pass g2', 'pass g3']))
 })
+
+test('loop back immediates', t => {
+    t.plan(1)
+
+    function* loop() {
+        let i = 0
+        i = yield (i + 1)
+        i = yield (i + 1)
+        return i + 1
+    }
+
+    return run(loop()).then(r => t.is(r, 3))
+})
