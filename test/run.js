@@ -68,3 +68,21 @@ test('accept generators as iterators', t => {
 
     return run(gen).then(r => t.is(r, 'pass'))
 })
+
+test('support for custom runner', t => {
+    t.plan(3)
+
+    function* runner(iterator, ...args) {
+        t.pass(1)
+        return yield* this.stepper(iterator, ...args)
+    }
+
+    function* pass() { // eslint-disable-line require-yield
+        t.pass()
+        return 'pass'
+    }
+
+    const custom = run.use(runner)
+
+    return custom(pass()).then(r => t.is(r, 'pass'))
+})
