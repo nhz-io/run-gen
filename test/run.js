@@ -62,7 +62,7 @@ test('loop back immediates', t => {
 test('accept generators as iterators', t => {
     t.plan(1)
 
-    function* gen() {
+    function* gen() { // eslint-disable-line require-yield
         return 'pass'
     }
 
