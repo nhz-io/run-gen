@@ -21,10 +21,10 @@ class RunGen {
         return result.value.then(res => this.run(iterator, res))
     }
 
-    * init(iterator) {
+    * init(iterator, result) {
         iterator[INIT] = true
 
-        return iterator.next()
+        return result
     }
 
     * runner(iterator, result, args) {
@@ -55,7 +55,9 @@ class RunGen {
             return yield* this.runner(iterator, iterator.next(args))
         }
 
-        return yield* this.runner(iterator, yield* this.init(iterator), args)
+        return yield* this.runner(
+            iterator, yield* this.init(iterator, iterator.next()), args
+        )
     }
 
     _run(...args) {
