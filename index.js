@@ -10,13 +10,22 @@ function* pass(value) { // eslint-disable-line require-yield
     return value
 }
 
-function* init(iterator) { // eslint-disable-line require-yield
+function* defaultInit(iterator) { // eslint-disable-line require-yield
     iterator[INIT] = true
 
     return iterator.next()
 }
 
-function use(runner) {
+function* defaultRunner(iterator, ...args) {
+    if (isFn(iterator)) {
+        iterator = iterator(...args)
+        args = []
+    }
+
+    return yield* this.stepper(iterator, ...args)
+}
+
+function use(runner = defaultRunner, init = defaultInit) {
     function* promisedDone(promise) { // eslint-disable-line require-yield
         return promise.then(res => this.run(pass(res)))
     }
@@ -82,18 +91,9 @@ function use(runner) {
     }
 
     return Object.assign(run, {
-        pass, init, promisedDone, promisedNext,
-        stepper, runner, run, use,
+        pass, promisedDone, promisedNext,
+        stepper, runner, init, run, use,
     })
 }
 
-function* runner(iterator, ...args) {
-    if (isFn(iterator)) {
-        iterator = iterator(...args)
-        args = []
-    }
-
-    return yield* this.stepper(iterator, ...args)
-}
-
-module.exports = use(runner)
+module.exports = use(defaultRunner, defaultInit)
