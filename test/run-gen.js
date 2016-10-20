@@ -69,23 +69,6 @@ test('accept generators as iterators', t => {
     return run(gen).then(r => t.is(r, 'pass'))
 })
 
-test('support for custom runner', t => {
-    t.plan(3)
-
-    function* runner(iterator, ...args) {
-        t.pass(1)
-        return yield* this.stepper(iterator, ...args)
-    }
-
-    function* pass() { // eslint-disable-line require-yield
-        t.pass()
-        return 'pass'
-    }
-    const custom = run.use(runner)
-
-    return custom(pass()).then(r => t.is(r, 'pass'))
-})
-
 test('returned promise handled correctly', t => {
     t.plan(1)
 
@@ -121,7 +104,9 @@ test('all args are passed to the iterator non-initial next() call', t => {
     t.plan(1)
 
     function* gen() {
-        return yield
+        const crap = yield
+
+        return crap
     }
 
     return run(gen(), 1, 2, 3).then(r => t.deepEqual(r, [1, 2, 3]))

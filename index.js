@@ -1,99 +1,82 @@
+/* eslint-disable require-yield, no-constant-condition */
+
 'use strict'
 
 const INIT = Symbol.for('INIT')
 
-function isFn(test) {
-    return typeof test === 'function'
-}
-
-function* pass(value) { // eslint-disable-line require-yield
-    return value
-}
-
-function* defaultInit(iterator) { // eslint-disable-line require-yield
-    iterator[INIT] = true
-
-    return iterator.next()
-}
-
-function* defaultRunner(iterator, ...args) {
-    if (isFn(iterator)) {
-        iterator = iterator(...args)
-        args = []
+class RunGen {
+    constructor() {
+        this.run = this.run.bind(this)
     }
 
-    return yield* this.stepper(iterator, ...args)
-}
-
-function use(runner = defaultRunner, init = defaultInit) {
-    function* promisedDone(promise) { // eslint-disable-line require-yield
-        return promise.then(res => this.run(pass(res)))
+    * wrap(value) {
+        return value
     }
 
-    // eslint-disable-next-line require-yield
-    function* promisedNext(promise, iterator) {
-        return promise.then(arg => this.run(iterator, arg))
+    * resolve(result, iterator) {
+        if (result.done) {
+            return result.value.then(res => this.run(this.wrap(res)))
+        }
+
+        return result.value.then(res => this.run(iterator, res))
     }
 
-    function* stepper(iterator, ...args) {
-        if (!iterator[INIT]) {
-            const result = yield* this.init(iterator)
+    * init(iterator) {
+        iterator[INIT] = true
 
-            if (result.value && isFn(result.value.then)) {
-                if (result.done) {
-                    return yield* this.promisedDone(result.value)
-                }
+        return iterator.next()
+    }
 
-                return yield* this.promisedNext(result.value, iterator)
-            }
+    * runner(iterator, result, args) {
+        if (result.value && typeof result.value.then === 'function') {
+            return yield* this.resolve(result, iterator)
+        }
+
+        if (result.done) {
+            return result.value
+        }
+
+        yield result.value
+
+        return yield* this.runner(iterator, iterator.next(args || result.value))
+    }
+
+    * start(iterator, ...args) {
+        if (typeof iterator === 'function') {
+            iterator = iterator(...args)
+            args = []
+        }
+
+        if (args.length < 2) {
+            args = args[0]
+        }
+
+        if (iterator[INIT]) {
+            return yield* this.runner(iterator, iterator.next(args))
+        }
+
+        return yield* this.runner(iterator, yield* this.init(iterator), args)
+    }
+
+    _run(...args) {
+        const iterator = this.start(...args)
+
+        while (true) {
+            const result = iterator.next()
 
             if (result.done) {
                 return result.value
             }
-
-            if (args.length < 1) {
-                args = [result.value]
-            }
-        }
-
-        while (true) { // eslint-disable-line no-constant-condition
-            const result = iterator.next(args.length < 2 ? args[0] : args)
-
-            if (result.value && isFn(result.value.then)) {
-                if (result.done) {
-                    return yield* this.promisedDone(result.value)
-                }
-
-                return yield* this.promisedNext(result.value, iterator)
-            }
-
-            if (result.done) {
-                return result.value
-            }
-
-            args = [result.value]
-            yield result.value
         }
     }
 
-    function run(iterator, ...args) {
-        return Promise.resolve().then(() => {
-            iterator = run.runner(iterator, ...args)
-
-            while (true) { // eslint-disable-line no-constant-condition
-                const result = iterator.next()
-
-                if (result.done) {
-                    return result.value
-                }
-            }
-        })
+    run(...args) {
+        return Promise.resolve().then(() => this._run(...args))
     }
-
-    return Object.assign(run, {
-        pass, promisedDone, promisedNext,
-        stepper, runner, init, run, use,
-    })
 }
 
-module.exports = use(defaultRunner, defaultInit)
+const runGen = new RunGen()
+runGen.run.RunGen = RunGen
+runGen.run.INIT = INIT
+
+module.exports = runGen.run
