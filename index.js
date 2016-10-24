@@ -43,8 +43,7 @@ class RunGen {
 
     * start(iterator, ...args) {
         if (typeof iterator === 'function') {
-            iterator = iterator(...args)
-            args = []
+            return yield* this.start(iterator(...args))
         }
 
         if (args.length < 2) {
