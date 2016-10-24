@@ -41,11 +41,7 @@ class RunGen {
         return yield* this.runner(iterator, iterator.next(args || result.value))
     }
 
-    * start(iterator, ...args) {
-        if (typeof iterator === 'function') {
-            return yield* this.start(iterator(...args))
-        }
-
+    * _start(iterator, ...args) {
         if (args.length < 2) {
             args = args[0]
         }
@@ -57,6 +53,14 @@ class RunGen {
         return yield* this.runner(
             iterator, yield* this.init(iterator, iterator.next()), args
         )
+    }
+
+    * start(iterator, ...args) {
+        if (typeof iterator === 'function') {
+            return yield* this.start(iterator(...args))
+        }
+
+        return yield* this._start(iterator, ...args)
     }
 
     _run(...args) {
